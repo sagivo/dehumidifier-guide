@@ -1,7 +1,7 @@
 ---
 title: "The 7 Best Whole-House Dehumidifiers of 2026: Honest Rankings by Capacity, Value & Use Case"
 seoTitle: "Best Whole-House Dehumidifiers 2026 (Top 7 Picks, Ranked)"
-description: "Ranked picks for the best whole-house dehumidifiers in 2026 — from the AprilAire E100 Pro best-overall pick to the budget-friendly AlorAir HD55. AHAM ratings, prices, and who each unit is for."
+description: "The best whole-house dehumidifiers of 2026, ranked — from the AprilAire E100 Pro to the budget AlorAir HD55. AHAM ratings, prices, and who each is for."
 pubDate: 2026-10-10
 updatedDate: 2026-10-10
 category: best
