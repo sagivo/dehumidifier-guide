@@ -1,7 +1,7 @@
 ---
 title: "AHAM vs Saturation Pints Explained: How Dehumidifier Ratings Actually Work"
 seoTitle: "AHAM vs Saturation Pints: Dehumidifier Ratings Explained"
-description: "AHAM pints (80°F/60% RH) are the only fair way to compare dehumidifiers. Learn why saturation marketing numbers run ~2x higher and how to translate any box claim into real capacity."
+description: "AHAM pints (80°F/60% RH) are the only fair way to compare dehumidifiers. Learn why saturation numbers run ~2x higher and how to translate box claims."
 pubDate: 2026-10-10
 updatedDate: 2026-10-10
 category: explainer
@@ -93,3 +93,5 @@ Pin this to your shopping notes:
 - **Sizing, rankings, tools** → always AHAM in, always AHAM out.
 
 One last habit worth building: whenever a product page, review, or forum post quotes pints without saying which test, assume saturation and go find the AHAM line before believing the number. The thirty seconds it takes has saved more buyers from an undersized unit than any other single check.
+
+To see the two rating styles in the wild, compare our [AprilAire E100 Pro review](/dehumidifiers/aprilaire-e100-pro/) (100 pints marketed, 85 DOE) with the [AlorAir Sentinel HD55 review](/dehumidifiers/alorair-sentinel-hd55/) (120 box pints, 55 AHAM) — same math, different labels. And once you've picked your honest capacity number, run it through the [capacity sizer tool](/tools/capacity-sizer/) to match it to your square footage and climate zone.
