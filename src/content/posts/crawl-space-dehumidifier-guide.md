@@ -1,7 +1,7 @@
 ---
 title: "Crawl Space Dehumidifier Guide: Encapsulation, Drainage & the Best Units for 2026"
 seoTitle: "Crawl Space Dehumidifier Guide 2026 (Best Units & Setup)"
-description: "Why crawl spaces need dedicated dehumidifiers, how encapsulation and drainage planning work, and the top picks for 2026: AlorAir HDi90, AprilAire E070 Pro, Santa Fe Compact70, AlorAir HD55."
+description: "Crawl space dehumidifier guide 2026: encapsulation, drainage planning, and top picks — AlorAir HDi90, AprilAire E070 Pro, Santa Fe Compact70."
 pubDate: 2026-10-10
 updatedDate: 2026-10-10
 category: guide
