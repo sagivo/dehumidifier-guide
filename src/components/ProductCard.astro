@@ -1,12 +1,12 @@
 ---
-import type { DehumidifierModel } from "../data/models";
+import type { MowerModel } from "../data/models";
 import { formatCapacity } from "../data/models";
 import BuyButton from "./BuyButton.astro";
 import ProductImage from "./ProductImage.astro";
 import PriceTier from "./PriceTier.astro";
 
 interface Props {
-  model: DehumidifierModel;
+  model: MowerModel;
   label?: string;
   rank?: number;
   /** compact = no pros/cons, used in top-picks grids */

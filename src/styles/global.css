@@ -1,21 +1,21 @@
 /* Dehumidifier Guide design system — "dry air" theme.
-   Deep slate-teal + bright aqua brand, cool paper background, and one loud
+   Deep slate-teal accents on the template's warm paper, and one loud
    buy colour (amber) reserved for Amazon links so the money buttons always
    stand out. */
 :root {
-  --paper: #f3f6f6;
-  --paper-2: #e8efef;
+  --paper: #f6f4ec;
+  --paper-2: #eeeadc;
   --card: #ffffff;
-  --ink: #0a1a1e;
-  --ink-2: #24383d;
-  --muted: #5b6f74;
-  --line: #dbe5e5;
-  --line-2: #c8d8d8;
-  --forest: #0a1e24;
-  --forest-2: #0f323b;
-  --forest-3: #155e6b;
-  --leaf: #0e7c86;
-  --leaf-2: #17a2b0;
+  --ink: #0b1a10;
+  --ink-2: #2b3a30;
+  --muted: #5d6a60;
+  --line: #e2ddcd;
+  --line-2: #d3cdb9;
+  --forest: #0c2215;
+  --forest-2: #12321e;
+  --forest-3: #1a4529;
+  --leaf: #0f766e;
+  --leaf-2: #14a08c;
   --lime: #5eead4;
   --lime-2: #cdf7f1;
   --buy: #ffc21a;
@@ -27,8 +27,8 @@
   --amber-ink: #6b5310;
   --radius: 18px;
   --radius-sm: 12px;
-  --shadow: 0 1px 2px rgba(10, 26, 30, .06), 0 12px 32px -12px rgba(10, 26, 30, .18);
-  --shadow-lg: 0 2px 4px rgba(10, 26, 30, .06), 0 28px 60px -20px rgba(10, 26, 30, .35);
+  --shadow: 0 1px 2px rgba(11, 26, 16, .06), 0 12px 32px -12px rgba(11, 26, 16, .18);
+  --shadow-lg: 0 2px 4px rgba(11, 26, 16, .06), 0 28px 60px -20px rgba(11, 26, 16, .35);
   --press: 0 3px 0 var(--ink);
   --stripes: repeating-linear-gradient(115deg, rgba(255,255,255,.035) 0 60px, rgba(0,0,0,.05) 60px 120px);
   --font-display: "Bricolage Grotesque Variable", "Bricolage Grotesque", -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -41,7 +41,7 @@
   --green-900: var(--forest-2);
   --green-700: var(--leaf);
   --green-600: var(--leaf-2);
-  --green-500: #2bb5c0;
+  --green-500: #40b955;
   --lime-soft: var(--lime-2);
 }
 

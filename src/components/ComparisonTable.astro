@@ -1,11 +1,11 @@
 ---
-import type { DehumidifierModel } from "../data/models";
+import type { MowerModel } from "../data/models";
 import { formatCapacity } from "../data/models";
 import PriceTier from "./PriceTier.astro";
 import { AFFILIATE_REL, amazonLink } from "../lib/amazon";
 
 interface Props {
-  models: DehumidifierModel[];
+  models: MowerModel[];
   sortable?: boolean;
   caption?: string;
 }

@@ -1,10 +1,10 @@
 ---
 // Price band ($–$$$$) in place of a dollar figure; see PRICE_TIERS in models.ts.
-import type { DehumidifierModel } from "../data/models";
+import type { MowerModel } from "../data/models";
 import { priceTier, PRICE_TIERS } from "../data/models";
 
 interface Props {
-  model: DehumidifierModel;
+  model: MowerModel;
   /** show the band name ("Mid-range") next to the symbols */
   label?: boolean;
 }

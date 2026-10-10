@@ -6,13 +6,13 @@
 //  3. A generated illustration of the model's hardware
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
-import type { DehumidifierModel } from "../data/models";
+import type { MowerModel } from "../data/models";
 import { getAmazonImages } from "../lib/amazon-images";
 import { AFFILIATE_REL, amazonLink } from "../lib/amazon";
 import DehumidifierArt from "./DehumidifierArt.astro";
 
 interface Props {
-  model: DehumidifierModel;
+  model: MowerModel;
   size?: number;
   eager?: boolean;
 }

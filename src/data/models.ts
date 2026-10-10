@@ -539,3 +539,5 @@ export function formatCapacity(m: DehumidifierModel): string {
   }
   return base;
 }
+
+export type MowerModel = DehumidifierModel;
