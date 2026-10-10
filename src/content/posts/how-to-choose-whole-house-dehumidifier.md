@@ -1,7 +1,7 @@
 ---
 title: "How to Choose a Whole-House Dehumidifier: The 5 Decisions That Matter"
 seoTitle: "How to Choose a Whole-House Dehumidifier (5-Step Guide)"
-description: "Choosing a whole-house dehumidifier comes down to 5 decisions: AHAM sizing, drainage, ducted vs standalone, climate/space type, and budget. Cheat-sheet style guide with real numbers."
+description: "How to choose a whole-house dehumidifier in 5 decisions: AHAM sizing, drainage, ducted vs standalone, climate/space type, and budget."
 pubDate: 2026-10-10
 updatedDate: 2026-10-10
 category: guide
