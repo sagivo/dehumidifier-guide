@@ -1,7 +1,7 @@
 ---
 title: "Portable vs Whole-House Dehumidifier: Cost, Coverage & When Each Wins (2026)"
 seoTitle: "Portable vs Whole-House Dehumidifier: Which Is Worth It?"
-description: "Portable 50-pint vs whole-house dehumidifier compared on upfront cost, energy, coverage, and lifespan — plus when a portable is enough and when it's false economy."
+description: "Portable 50-pint vs whole-house dehumidifier on cost, energy, coverage, and lifespan — plus when portable is enough and when it's false economy."
 pubDate: 2026-10-10
 updatedDate: 2026-10-10
 category: cost
