@@ -1,7 +1,7 @@
 ---
 title: "Dehumidifier Sizing by Climate Zone: Capacity Tables for Every US Region"
 seoTitle: "Dehumidifier Sizing by Climate Zone (2026 Capacity Guide)"
-description: "Size your whole-house dehumidifier by climate zone: capacity tables for the Gulf Coast, Southeast, Mid-Atlantic, Midwest, and arid regions, plus dampness multipliers and the 20–30% headroom rule."
+description: "Size your dehumidifier by climate zone: capacity tables for the Gulf Coast, Southeast, Mid-Atlantic, Midwest, and arid regions, plus headroom rules."
 pubDate: 2026-10-10
 updatedDate: 2026-10-10
 category: guide
