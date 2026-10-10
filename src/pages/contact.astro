@@ -1,0 +1,17 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { SITE_NAME, SITE_URL } from "../lib/site";
+---
+
+<BaseLayout title="Contact" description={`Contact the ${SITE_NAME} team.`} noindex={true}>
+  <div class="wrap">
+    <article class="prose">
+      <h1>Contact</h1>
+      <p>
+        Questions about a dehumidifier, a calculator result, or a correction to our
+        guides? Email us at <strong>hello@{new URL(SITE_URL).hostname}</strong> —
+        we read everything and update guides when readers spot errors.
+      </p>
+    </article>
+  </div>
+</BaseLayout>

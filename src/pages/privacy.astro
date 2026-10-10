@@ -1,0 +1,42 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { SITE_NAME, SITE_URL } from "../lib/site";
+---
+
+<BaseLayout title="Privacy Policy" description={`${SITE_NAME} privacy policy.`} noindex={true}>
+  <div class="wrap">
+    <article class="prose">
+      <h1>Privacy Policy</h1>
+      <p><em>Last updated: October 7, 2026</em></p>
+      <h2>What we collect</h2>
+      <p>
+        {SITE_NAME} does not require accounts and does not collect personal
+        information directly. Our calculators run entirely in your browser —
+        nothing you enter leaves your device.
+      </p>
+      <h2>Cookies and analytics</h2>
+      <p>
+        We use <a href="https://posthog.com" rel="noopener">PostHog</a> to
+        understand which pages are useful. It records page views, outbound
+        and affiliate link clicks (so we know which recommendations help),
+        and web performance metrics (page load timing and Web Vitals such as
+        LCP, INP, and CLS). PostHog stores a cookie or local-storage entry
+        to distinguish visits; session replays are disabled and we honor
+        your browser's Do Not Track setting.
+      </p>
+      <p>
+        Outbound links to Amazon carry an affiliate tag so qualifying
+        purchases can be attributed; Amazon's own privacy policy applies on
+        amazon.com.
+      </p>
+      <h2>Affiliate disclosure</h2>
+      <p>
+        {SITE_NAME} is a participant in the Amazon Services LLC Associates
+        Program, an affiliate advertising program designed to provide a means
+        for sites to earn advertising fees by advertising and linking to Amazon.com.
+      </p>
+      <h2>Contact</h2>
+      <p>Privacy questions: hello@{new URL(SITE_URL).hostname}</p>
+    </article>
+  </div>
+</BaseLayout>

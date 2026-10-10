@@ -1,0 +1,11 @@
+---
+import { VISUALS } from "../lib/visuals";
+
+interface Props {
+  name: keyof typeof VISUALS | string;
+}
+const render = VISUALS[Astro.props.name];
+if (!render) throw new Error(`Unknown visual: ${Astro.props.name}`);
+---
+
+<Fragment set:html={render()} />

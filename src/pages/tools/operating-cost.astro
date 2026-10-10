@@ -1,0 +1,111 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { SITE_URL } from "../../lib/site";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import { breadcrumbLd } from "../../lib/schema";
+import { MODELS } from "../../data/models";
+import { amazonLink } from "../../lib/amazon";
+
+const modelsJson = JSON.stringify(
+  MODELS.map((m) => ({ id: m.id, name: m.shortName, watts: Math.round(m.amps * 120), pintsAham: m.pintsAham, link: amazonLink(m.query, m.asin) }))
+);
+
+const title = "Dehumidifier Running Cost Calculator — What Will It Cost Per Year?";
+const description =
+  "Estimate the yearly electricity cost of running a whole-house or crawl-space dehumidifier. Pick a model, set hours and your kWh rate.";
+const url = `${SITE_URL}/tools/operating-cost/`;
+
+const crumbs = [
+  { name: "Home", href: "/" },
+  { name: "Tools", href: "/tools/" },
+  { name: "Operating cost", href: "/tools/operating-cost/" },
+];
+const jsonLd = [breadcrumbLd(crumbs), {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Dehumidifier Operating Cost Calculator",
+  applicationCategory: "UtilitiesApplication",
+  operatingSystem: "Any",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  url,
+}];
+---
+
+<BaseLayout title={title} description={description} canonical={url} jsonLd={jsonLd}>
+  <div class="wrap">
+    <Breadcrumbs crumbs={crumbs} />
+    <div class="calc-hero">
+      <h1>What does a dehumidifier cost to run?</h1>
+      <p>
+        Whole-house units draw 500–1,000W while running. Pick a model, tell us how many
+        hours a day it runs in your climate, and see the yearly electricity cost.
+      </p>
+    </div>
+
+    <div class="calc">
+      <div>
+        <label for="model">Unit</label>
+        <select id="model"></select>
+      </div>
+      <div>
+        <label for="hours">Running hours per day <output id="hours-out">12 hours</output></label>
+        <input id="hours" type="range" min="4" max="24" step="1" value="12" />
+      </div>
+      <div>
+        <label for="rate">Electricity rate <output id="rate-out">$0.17/kWh</output></label>
+        <input id="rate" type="range" min="0.08" max="0.40" step="0.01" value="0.17" />
+      </div>
+      <div class="calc-result" id="cost-result" aria-live="polite"></div>
+    </div>
+
+    <article class="prose" data-pagefind-body>
+      <h2>What drives the bill</h2>
+      <p>
+        Two things matter: <strong>wattage</strong> (we estimate from each model's amp draw at 120V)
+        and <strong>duty cycle</strong> — a right-sized unit in a sealed space might run 8–10 hours a
+        day, while an undersized one in a damp Gulf Coast crawl space can run 24/7. That is why
+        <a href="/tools/capacity-sizer/">sizing correctly</a> saves money twice: a cheaper unit that
+        runs constantly often costs more per year than a bigger, more efficient one that cycles.
+        Energy Star models (most of the AprilAire line, the AlorAir HD55/HD90) stretch each kWh further.
+      </p>
+    </article>
+  </div>
+
+  <script define:vars={{ modelsJson }}>
+    const MODELS = JSON.parse(modelsJson);
+    const $ = (id) => document.getElementById(id);
+    const money = (n) => "$" + Math.round(n).toLocaleString("en-US");
+
+    const sel = $("model");
+    MODELS.forEach((m, i) => {
+      const o = document.createElement("option");
+      o.value = i;
+      o.textContent = `${m.name} — ~${m.watts}W`;
+      sel.appendChild(o);
+    });
+
+    function paint(el) {
+      const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+      el.style.setProperty("--fill", pct + "%");
+    }
+
+    function calc() {
+      const m = MODELS[Number(sel.value)];
+      const hours = Number($("hours").value);
+      const rate = Number($("rate").value);
+      paint($("hours")); paint($("rate"));
+      $("hours-out").textContent = hours + " hours";
+      $("rate-out").textContent = "$" + rate.toFixed(2) + "/kWh";
+      const kwhDay = (m.watts * hours) / 1000;
+      const year = kwhDay * 365 * rate;
+      const pintsYear = m.pintsAham * hours / 24 * 365;
+      $("cost-result").innerHTML =
+        `<p class="calc-big">About <strong>${money(year)}/year</strong> in electricity</p>` +
+        `<p>The ${m.name} draws ~${m.watts}W. At ${hours} hrs/day and $${rate.toFixed(2)}/kWh, that's ${(kwhDay).toFixed(1)} kWh/day — removing roughly ${Math.round(pintsYear).toLocaleString("en-US")} pints a year. ` +
+        `<a href="/dehumidifiers/${MODELS[Number(sel.value)].id}/">Read the ${m.name} review</a> · <a href="${m.link}" target="_blank" rel="sponsored nofollow noopener">Check price</a></p>`;
+    }
+
+    [sel, $("hours"), $("rate")].forEach((el) => el.addEventListener("input", calc));
+    calc();
+  </script>
+</BaseLayout>

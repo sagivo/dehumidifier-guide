@@ -1,0 +1,52 @@
+---
+// Product visual, in order of preference:
+//  1. A licensed photo at src/assets/dehumidifiers/<model-id>.{jpg,jpeg,png,webp}
+//  2. The Amazon product photo from the Creators API (hotlinked, never stored,
+//     always linked to the Amazon product page, as Associates policy requires)
+//  3. A generated illustration of the model's hardware
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import type { DehumidifierModel } from "../data/models";
+import { getAmazonImages } from "../lib/amazon-images";
+import { AFFILIATE_REL, amazonLink } from "../lib/amazon";
+import DehumidifierArt from "./DehumidifierArt.astro";
+
+interface Props {
+  model: DehumidifierModel;
+  size?: number;
+  eager?: boolean;
+}
+const { model, size = 96, eager = false } = Astro.props;
+
+const photos = import.meta.glob<{ default: ImageMetadata }>("../assets/dehumidifiers/*.{jpg,jpeg,png,webp}", { eager: true });
+const entry = Object.entries(photos).find(([path]) => path.split("/").pop()!.replace(/\.\w+$/, "") === model.id);
+const photo = entry?.[1].default;
+const amazon = !photo && model.asin ? (await getAmazonImages()).get(model.asin) : undefined;
+const height = amazon ? Math.round((size * amazon.height) / amazon.width) : 0;
+---
+
+{photo ? (
+  <Image
+    class="product-photo"
+    src={photo}
+    alt={model.name}
+    width={size}
+    densities={[1, 2]}
+    loading={eager ? "eager" : "lazy"}
+    fetchpriority={eager ? "high" : "auto"}
+  />
+) : amazon ? (
+  <a class="amazon-photo" href={amazon.detailUrl ?? amazonLink(model.query, model.asin)} rel={AFFILIATE_REL} target="_blank">
+    <img
+      src={amazon.url}
+      alt={model.name}
+      width={size}
+      height={height}
+      loading={eager ? "eager" : "lazy"}
+      decoding="async"
+      referrerpolicy="no-referrer-when-downgrade"
+    />
+  </a>
+) : (
+  <DehumidifierArt model={model} size={size} />
+)}

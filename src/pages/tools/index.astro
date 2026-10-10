@@ -1,0 +1,42 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import { SITE_URL } from "../../lib/site";
+import { breadcrumbLd, type Crumb } from "../../lib/schema";
+
+const crumbs: Crumb[] = [
+  { name: "Home", href: "/" },
+  { name: "Tools", href: "/tools/" },
+];
+const tools = [
+  { href: "/tools/capacity-sizer/", icon: "📐", name: "Capacity Sizer", text: "Enter square footage, space type and dampness. Get the AHAM pints/day you need and the models that deliver it.", go: "Size my space" },
+  { href: "/tools/operating-cost/", icon: "💰", name: "Running Cost Calculator", text: "Your yearly electricity cost for each model at your kWh rate and duty cycle.", go: "Do the math" },
+  { href: "/tools/portable-vs-whole-house/", icon: "⚖️", name: "Portable vs Whole-House", text: "The true 5-year cost of a portable 50-pint unit versus a pro-grade whole-house system.", go: "Compare costs" },
+  { href: "/dehumidifiers/", icon: "📊", name: "Comparison Chart", text: "Every model side by side: honest AHAM capacity, marketed ratings, coverage, drainage and price. Sortable.", go: "Compare models" },
+];
+---
+
+<BaseLayout
+  title="Free Dehumidifier Calculators & Tools"
+  description="Free dehumidifier tools: capacity sizer, running cost calculator, portable vs whole-house cost comparison and a sortable comparison chart of every pro-grade model."
+  canonical={`${SITE_URL}/tools/`}
+  jsonLd={breadcrumbLd(crumbs)}
+>
+  <div class="wrap wide">
+    <Breadcrumbs crumbs={crumbs} />
+    <div class="calc-hero">
+      <h1>Free dehumidifier tools</h1>
+      <p>Turn "what size dehumidifier do I need?" into numbers. Every tool runs in your browser, and nothing you enter leaves your device.</p>
+    </div>
+    <div class="tool-grid">
+      {tools.map((t) => (
+        <a class="tool-card" href={t.href}>
+          <div class="tool-icon">{t.icon}</div>
+          <h2 class="h3">{t.name}</h2>
+          <p>{t.text}</p>
+          <span class="go">{t.go}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

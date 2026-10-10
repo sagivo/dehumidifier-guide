@@ -1,0 +1,28 @@
+# Rebuilds the site twice a day via a Cloudflare Pages deploy hook.
+# Required once Amazon product photos are enabled: Associates policy allows
+# keeping Amazon image links for at most 24 hours, and each build fetches fresh
+# ones from the Creators API (src/lib/amazon-images.ts).
+#
+# Setup: Cloudflare Pages → robot-mower-guide → Settings → Builds → Deploy hooks →
+# add hook for branch "main", then save its URL as the GitHub repo secret
+# CF_DEPLOY_HOOK (Settings → Secrets and variables → Actions).
+name: Scheduled rebuild
+
+on:
+  schedule:
+    - cron: "17 5,17 * * *"
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudflare Pages deploy
+        env:
+          HOOK: ${{ secrets.CF_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "CF_DEPLOY_HOOK secret not set; skipping."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK"

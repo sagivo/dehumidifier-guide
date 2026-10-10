@@ -1,0 +1,39 @@
+---
+import type { DehumidifierModel } from "../data/models";
+import BuyButton from "./BuyButton.astro";
+import PriceTier from "./PriceTier.astro";
+
+interface Props {
+  model: DehumidifierModel;
+  label?: string;
+  /** scroll distance (px) before the bar appears */
+  showAfter?: number;
+}
+const { model, label, showAfter = 900 } = Astro.props;
+---
+
+<div class="sticky-cta" id="sticky-cta" data-show-after={showAfter} hidden>
+  <div class="sc-text">
+    {label && <span class="sc-label">{label}</span>}
+    <strong>{model.shortName}</strong>
+    <span class="sc-price"><PriceTier model={model} /></span>
+  </div>
+  <BuyButton model={model} label="Check price" size="sm" />
+  <button class="sc-close" type="button" aria-label="Dismiss">×</button>
+</div>
+
+<script>
+  // Show after the reader scrolls past the intro; dismissible for the session.
+  const bar = document.getElementById("sticky-cta");
+  if (bar && !sessionStorage.getItem("cta-dismissed")) {
+    const onScroll = () => {
+      bar.hidden = window.scrollY < Number(bar.dataset.showAfter ?? 900);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    bar.querySelector(".sc-close")?.addEventListener("click", () => {
+      sessionStorage.setItem("cta-dismissed", "1");
+      window.removeEventListener("scroll", onScroll);
+      bar.hidden = true;
+    });
+  }
+</script>

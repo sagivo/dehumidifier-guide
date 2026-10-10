@@ -1,0 +1,24 @@
+---
+import type { DehumidifierModel } from "../data/models";
+import { AFFILIATE_REL, amazonLink } from "../lib/amazon";
+
+interface Props {
+  model: DehumidifierModel;
+  label?: string;
+  size?: "sm" | "md" | "lg";
+  /** stretch to the container width */
+  block?: boolean;
+}
+const { model, label = "Check price on Amazon", size = "md", block = false } = Astro.props;
+---
+
+<a
+  class:list={["btn", "buy", size === "sm" && "btn-sm", size === "lg" && "btn-lg", block && "btn-block"]}
+  href={amazonLink(model.query, model.asin)}
+  rel={AFFILIATE_REL}
+  target="_blank"
+  data-model={model.id}
+>
+  {label}
+  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</a>

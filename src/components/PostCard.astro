@@ -1,0 +1,19 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { CATEGORY_LABEL } from "../lib/posts";
+
+interface Props {
+  post: CollectionEntry<"posts">;
+}
+const { post } = Astro.props;
+const d = post.data.updatedDate ?? post.data.pubDate;
+---
+
+<a class="post-card" href={`/posts/${post.id}/`}>
+  <span class="post-tag">{post.data.tag ?? CATEGORY_LABEL[post.data.category]}</span>
+  <h3>{post.data.title}</h3>
+  <p>{post.data.description}</p>
+  <time datetime={d.toISOString()}>
+    Updated {d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" })}
+  </time>
+</a>

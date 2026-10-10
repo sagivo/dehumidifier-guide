@@ -1,0 +1,30 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { SITE_URL } from "../lib/site";
+---
+
+<BaseLayout
+  title="Search dehumidifier guides and reviews"
+  description="Search every Dehumidifier Guide review, comparison and buying guide."
+  canonical={`${SITE_URL}/search/`}
+  noindex={true}
+>
+  <link slot="head" rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+  <div class="wrap post-wrap">
+    <div class="calc-hero">
+      <h1>Search</h1>
+      <p>Find a model, a comparison or an answer across every guide and review.</p>
+    </div>
+    <div id="search" class="search-box"></div>
+    <noscript><p>Search needs JavaScript. Browse <a href="/guides/">all guides</a> or <a href="/dehumidifiers/">all models</a> instead.</p></noscript>
+  </div>
+  <script is:inline src="/pagefind/pagefind-ui.js"></script>
+  <script is:inline>
+    window.addEventListener("DOMContentLoaded", () => {
+      if (!window.PagefindUI) return;
+      const ui = new PagefindUI({ element: "#search", showSubResults: true, showImages: false, resetStyles: false });
+      const q = new URLSearchParams(location.search).get("q");
+      if (q) ui.triggerSearch(q);
+    });
+  </script>
+</BaseLayout>

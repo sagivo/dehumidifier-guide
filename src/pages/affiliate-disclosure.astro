@@ -1,0 +1,49 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import { SITE_NAME, SITE_URL } from "../lib/site";
+import { breadcrumbLd, type Crumb } from "../lib/schema";
+
+const crumbs: Crumb[] = [
+  { name: "Home", href: "/" },
+  { name: "Affiliate disclosure", href: "/affiliate-disclosure/" },
+];
+---
+
+<BaseLayout
+  title="Affiliate Disclosure"
+  description={`How ${SITE_NAME} earns money: Amazon Associates commissions on qualifying purchases, at no extra cost to you, and why commissions never decide our rankings.`}
+  canonical={`${SITE_URL}/affiliate-disclosure/`}
+  jsonLd={breadcrumbLd(crumbs)}
+>
+  <div class="wrap post-wrap">
+    <Breadcrumbs crumbs={crumbs} />
+    <article class="prose">
+      <h1>Affiliate disclosure</h1>
+      <p><strong>As an Amazon Associate, {SITE_NAME} earns from qualifying purchases.</strong></p>
+      <p>
+        Many product links on this site are affiliate links. If you click one and buy something, Amazon pays us a
+        small commission. The price you pay is exactly the same as if you had gone to Amazon directly. Affiliate
+        links are marked with a small ↗ arrow in our articles, and every page that contains them says so near the top.
+      </p>
+      <h2>What commissions don't change</h2>
+      <ul>
+        <li>Brands can't pay for a spot in our rankings or a higher score.</li>
+        <li>We don't accept free products in exchange for coverage.</li>
+        <li>We recommend dehumidifiers we can't earn a commission on when they're the right pick (for example, models sold only on the manufacturer's site).</li>
+        <li>Our scores come from the published process on <a href="/how-we-research/">how we research</a>.</li>
+      </ul>
+      <h2>Prices and product images</h2>
+      <p>
+        Prices on {SITE_NAME} are typical street prices at the time of our last update and change often. The price
+        on Amazon at the time of purchase is the one that applies. Product images that come from Amazon are provided
+        through Amazon's official tools and link to the product's Amazon page.
+      </p>
+      <p>
+        Amazon and the Amazon logo are trademarks of Amazon.com, Inc. or its affiliates.
+      </p>
+      <h2>Questions</h2>
+      <p>Anything unclear? <a href="/contact/">Contact us</a>.</p>
+    </article>
+  </div>
+</BaseLayout>

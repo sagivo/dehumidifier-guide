@@ -1,0 +1,20 @@
+---
+// Price band ($–$$$$) in place of a dollar figure; see PRICE_TIERS in models.ts.
+import type { DehumidifierModel } from "../data/models";
+import { priceTier, PRICE_TIERS } from "../data/models";
+
+interface Props {
+  model: DehumidifierModel;
+  /** show the band name ("Mid-range") next to the symbols */
+  label?: boolean;
+}
+const { model, label = true } = Astro.props;
+const t = priceTier(model);
+const max = PRICE_TIERS.length;
+---
+
+<span class="price-tier" title={`Price tier: ${t.label} (${t.range})`}>
+  <span class="pt-sym" aria-hidden="true"><b>{t.sym}</b>{"$".repeat(max - t.level)}</span>
+  {label && <span class="pt-label" aria-hidden="true">{t.label}</span>}
+  <span class="sr-only">Price tier: {t.label}, {t.range}</span>
+</span>

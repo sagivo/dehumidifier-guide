@@ -1,0 +1,58 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import PostCard from "../components/PostCard.astro";
+import { SITE_URL } from "../lib/site";
+import { getPosts, CATEGORY_LABEL, CATEGORY_ORDER } from "../lib/posts";
+import { breadcrumbLd, type Crumb } from "../lib/schema";
+
+const posts = await getPosts();
+const crumbs: Crumb[] = [
+  { name: "Home", href: "/" },
+  { name: "Guides", href: "/guides/" },
+];
+const groups = CATEGORY_ORDER.map((c) => ({ c, items: posts.filter((p) => p.data.category === c) })).filter(
+  (g) => g.items.length
+);
+const HEADINGS: Record<string, string> = {
+  best: "Best dehumidifiers by space",
+  comparison: "Head-to-head comparisons",
+  guide: "Buying & ownership advice",
+  cost: "Cost & value",
+  explainer: "How the ratings work",
+};
+const jsonLd = [
+  breadcrumbLd(crumbs),
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Dehumidifier guides",
+    url: `${SITE_URL}/guides/`,
+    hasPart: posts.map((p) => ({ "@type": "Article", headline: p.data.title, url: `${SITE_URL}/posts/${p.id}/` })),
+  },
+];
+---
+
+<BaseLayout
+  title="Dehumidifier Buying Guides, Comparisons & Advice"
+  description="Every Dehumidifier Guide in one place: best whole-house and crawl-space dehumidifiers, head-to-head comparisons, sizing advice, and cost breakdowns."
+  canonical={`${SITE_URL}/guides/`}
+  jsonLd={jsonLd}
+>
+  <div class="wrap wide">
+    <Breadcrumbs crumbs={crumbs} />
+    <div class="calc-hero">
+      <h1>Dehumidifier guides</h1>
+      <p>Everything you need to choose, size, and live with a whole-house or crawl-space dehumidifier. Start with the <a class="lime-link" href="/posts/best-whole-house-dehumidifiers-2026/">best dehumidifiers of 2026</a> if you're short on time.</p>
+    </div>
+    <nav class="chip-nav" aria-label="Guide categories">
+      {groups.map((g) => <a href={`#${g.c}`}>{CATEGORY_LABEL[g.c]} <span>{g.items.length}</span></a>)}
+    </nav>
+    {groups.map((g) => (
+      <section id={g.c}>
+        <div class="section-head"><h2 class="section-title">{HEADINGS[g.c]}</h2></div>
+        <div class="post-grid">{g.items.map((p) => <PostCard post={p} />)}</div>
+      </section>
+    ))}
+  </div>
+</BaseLayout>

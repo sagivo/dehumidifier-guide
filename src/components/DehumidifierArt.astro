@@ -1,0 +1,40 @@
+---
+/** Simple SVG illustration used when no product photo is available. */
+import type { DehumidifierModel } from "../data/models";
+
+interface Props {
+  model: DehumidifierModel;
+  size?: number;
+}
+const { model, size = 96 } = Astro.props;
+const uid = `dh-${model.id}`;
+---
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 120 120"
+  role="img"
+  aria-label={`${model.name} illustration`}
+  class="product-art"
+>
+  <defs>
+    <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#155e6b"></stop>
+      <stop offset="1" stop-color="#0a1e24"></stop>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="104" height="104" rx="20" fill={`url(#${uid}-bg)`}></rect>
+  <!-- unit cabinet -->
+  <rect x="38" y="30" width="44" height="62" rx="6" fill="#eef4f4" stroke="#0a1e24" stroke-width="2.5"></rect>
+  <!-- vent slats -->
+  <line x1="44" y1="42" x2="76" y2="42" stroke="#0e7c86" stroke-width="3" stroke-linecap="round"></line>
+  <line x1="44" y1="50" x2="76" y2="50" stroke="#0e7c86" stroke-width="3" stroke-linecap="round"></line>
+  <line x1="44" y1="58" x2="76" y2="58" stroke="#0e7c86" stroke-width="3" stroke-linecap="round"></line>
+  <!-- control dot -->
+  <circle cx="70" cy="70" r="4" fill="#5eead4"></circle>
+  <!-- droplet -->
+  <path d="M60 78 c-6 8 -9 11 -9 15 a9 9 0 0 0 18 0 c0 -4 -3 -7 -9 -15z" fill="#5eead4" opacity="0.9"></path>
+  <!-- airflow waves -->
+  <path d="M28 46 q6 -6 0 -12" stroke="#5eead4" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"></path>
+  <path d="M92 46 q-6 -6 0 -12" stroke="#5eead4" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"></path>
+</svg>

@@ -1,0 +1,255 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ProductCard from "../components/ProductCard.astro";
+import PostCard from "../components/PostCard.astro";
+import ComparisonTable from "../components/ComparisonTable.astro";
+import ProductImage from "../components/ProductImage.astro";
+import BuyButton from "../components/BuyButton.astro";
+import StickyCta from "../components/StickyCta.astro";
+import PriceTier from "../components/PriceTier.astro";
+import { SITE_NAME, SITE_DESCRIPTION } from "../lib/site";
+import { MODELS, getModel, priceTier } from "../data/models";
+import { getPosts } from "../lib/posts";
+import { websiteLd, faqLd, itemListLd } from "../lib/schema";
+import { HOME_PICKS } from "../data/picks";
+
+const posts = await getPosts();
+const latest = [...posts].sort(
+  (a, b) => (b.data.updatedDate ?? b.data.pubDate).valueOf() - (a.data.updatedDate ?? a.data.pubDate).valueOf()
+);
+const guides = latest.filter((p) => p.data.category !== "best").slice(0, 6);
+const topModels = [...MODELS].sort((a, b) => b.score - a.score).slice(0, 6);
+const picks = HOME_PICKS.map((p) => ({ ...p, model: getModel(p.id) }));
+
+const top = picks[0].model;
+// Award colours for the four homepage picks.
+const ACCENTS = ["#5eead4", "#ff9a6b", "#7fd8c6", "#ffd34f"];
+
+// Each space tile shows the #1 pick from its guide, so readers can buy straight from the homepage.
+const spaceTypes = [
+  { slug: "crawl-space-dehumidifier-guide", icon: "🕳️", title: "Crawl spaces", text: "Low-clearance units, pump drainage and encapsulation tips." },
+  { slug: "best-whole-house-dehumidifiers-2026", icon: "🏠", title: "Whole house", text: "Ducted 100+ pint units that protect the entire home." },
+  { slug: "dehumidifier-sizing-by-climate-zone", icon: "🌡️", title: "Humid climates", text: "Sizing tables from the Gulf Coast to the Midwest." },
+  { slug: "portable-vs-whole-house-dehumidifier", icon: "💵", title: "On a budget", text: "When a portable is enough — and when it's false economy." },
+  { slug: "aham-vs-saturation-pints-explained", icon: "🔢", title: "Decode the ratings", text: "AHAM vs saturation: read capacity numbers like a pro." },
+  { slug: "how-to-choose-whole-house-dehumidifier", icon: "🧭", title: "First-time buyer", text: "The five decisions that pick your unit." },
+].map((y) => {
+  const first = posts.find((p) => p.id === y.slug)?.data.picks?.[0];
+  return { ...y, href: `/posts/${y.slug}/`, pick: first ? getModel(first.id) : undefined };
+});
+
+const faq = [
+  {
+    q: "What is the best whole-house dehumidifier in 2026?",
+    a: `It depends on your space. Our top-rated pick overall is the ${picks[0].model.name}. For crawl spaces with no drain nearby, a unit with a built-in pump like the AlorAir Sentinel HDi90 solves the biggest headache; for tight budgets, the Sentinel HD55 is the value king. Our best whole-house dehumidifiers guide ranks them by use case.`,
+  },
+  {
+    q: "What does 'pints per day' actually mean?",
+    a: "It's the water a unit removes in 24 hours — but only the AHAM rating (measured at 80°F and 60% relative humidity) is comparable across brands. Some brands advertise a much larger 'saturation' number measured near 90°F/90% RH. Always compare AHAM to AHAM.",
+  },
+  {
+    q: "How much does a good whole-house dehumidifier cost?",
+    a: "Budget pro-grade units like the AlorAir Sentinel HD55 run about $500–$650. Mid-range 70–90 pint units cost roughly $1,000–$1,900, and premium 100–130 pint whole-house systems run about $2,000–$2,600 before installation.",
+  },
+  {
+    q: "Do I need a professional to install one?",
+    a: "Standalone basement or crawl-space units are usually DIY-friendly if you can route a drain hose. Ducted whole-house installations that tie into your HVAC should be done by a professional.",
+  },
+];
+
+const jsonLd = [websiteLd(), itemListLd("Top whole-house dehumidifiers of 2026", picks.map((p) => p.model)), faqLd(faq)];
+---
+
+<BaseLayout
+  title={`${SITE_NAME}: Best Whole-House Dehumidifiers of 2026, Compared`}
+  description={SITE_DESCRIPTION}
+  jsonLd={jsonLd}
+  hidePromo
+>
+  <section class="hero">
+    <div class="wrap wide hero-grid">
+      <div>
+        <span class="hero-kicker"><span class="dot" aria-hidden="true"></span>Updated October 2026</span>
+        <h1>The best whole-house dehumidifiers of 2026, <em>ranked.</em></h1>
+        <p class="lead">
+          We compared {MODELS.length} whole-house and crawl-space dehumidifiers on honest AHAM
+          capacity, coverage, drainage and price — so you can skip the spec-sheet games and buy dry air with confidence.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-lg" href="/posts/best-whole-house-dehumidifiers-2026/">See the ranking</a>
+          <a class="btn secondary btn-lg" href="#match">Size my space</a>
+        </div>
+        <div class="hero-proof">
+          <div><strong>{MODELS.length}</strong><span>pro-grade models</span></div>
+          <div><strong>{new Set(MODELS.map((m) => m.brand)).size}</strong><span>brands compared</span></div>
+          <div><strong>0</strong><span>inflated ratings trusted</span></div>
+        </div>
+      </div>
+
+      <aside class="spotlight" aria-label="Our top pick">
+        <div class="sp-ribbon"><span>🏆 #1 {picks[0].label}</span><span>2026</span></div>
+        <div class="sp-media"><ProductImage model={top} size={260} eager /></div>
+        <div class="sp-body">
+          <h2 class="sp-name"><a href={`/dehumidifiers/${top.id}/`}>{top.name}</a></h2>
+          <div class="sp-meta">
+            <span class="ring" style={`--v:${top.score * 10}`}><span>{top.score.toFixed(1)}</span></span>
+            <span class="ring-label"><strong>Guide score</strong>out of 10</span>
+            <span class="sp-price"><PriceTier model={top} label={false} /><small>{priceTier(top).label} price tier</small></span>
+          </div>
+          <ul class="sp-points">{top.pros.slice(0, 3).map((p) => <li>{p}</li>)}</ul>
+          <BuyButton model={top} size="lg" block />
+          <div class="sp-links">
+            <a href={`/dehumidifiers/${top.id}/`}>Read the review →</a>
+            <a href="/dehumidifiers/">Compare all {MODELS.length}</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="trust-bar" aria-label="Why readers trust us">
+    <ul>
+      <li><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Commissions never decide rankings</li>
+      <li><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>AHAM ratings, never box marketing</li>
+      <li><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Specs refreshed October 2026</li>
+      <li><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9M12 19V5M19 19v-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Free sizing &amp; cost calculators</li>
+    </ul>
+  </section>
+
+  <div class="wrap wide">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Editor's picks</span>
+        <h2 class="section-title">The 4 dehumidifiers we'd buy in 2026</h2>
+        <p class="section-sub">One clear winner for each kind of space. Tap a card for the full review.</p>
+      </div>
+      <a class="section-link" href="/posts/best-whole-house-dehumidifiers-2026/">Full ranking →</a>
+    </div>
+    <div class="tp-grid four">
+      {picks.map((p, i) => <ProductCard model={p.model} label={p.label} featured={i === 0} accent={ACCENTS[i]} />)}
+    </div>
+    <p class="swipe-hint">Swipe for more picks →</p>
+
+    <form class="matcher" id="match" action="/tools/capacity-sizer/" method="get">
+      <div>
+        <span class="eyebrow" style="color:var(--ink)">30-second sizer</span>
+        <h2>What size dehumidifier fits your space?</h2>
+        <p>Two quick answers and we'll show the models rated for your square footage and dampness level, with headroom built in.</p>
+      </div>
+      <div class="mq">
+        <fieldset>
+          <legend>How big is the space?</legend>
+          <div class="mq-opts">
+            <label><input type="radio" name="sqft" value="1000" /><span>Under 1,000 sq ft</span></label>
+            <label><input type="radio" name="sqft" value="1800" checked /><span>1,000–2,000 sq ft</span></label>
+            <label><input type="radio" name="sqft" value="3000" /><span>2,000–4,000 sq ft</span></label>
+            <label><input type="radio" name="sqft" value="6000" /><span>4,000+ sq ft</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>What kind of space?</legend>
+          <div class="mq-opts">
+            <label><input type="radio" name="space" value="crawl" checked /><span>Crawl space</span></label>
+            <label><input type="radio" name="space" value="basement" /><span>Basement</span></label>
+            <label><input type="radio" name="space" value="whole" /><span>Whole house</span></label>
+          </div>
+        </fieldset>
+        <button class="btn dark btn-lg" type="submit">Size my space →</button>
+      </div>
+    </form>
+
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Shop by space</span>
+        <h2 class="section-title">Best dehumidifier for your space</h2>
+      </div>
+      <a class="section-link" href="/guides/">All guides →</a>
+    </div>
+    <div class="yard-grid">
+      {spaceTypes.map((y) => (
+        <div class="yard">
+          <div class="yard-top">
+            <div class="yard-icon" aria-hidden="true">{y.icon}</div>
+            <h3><a href={y.href}>{y.title}</a></h3>
+          </div>
+          <p>{y.text}</p>
+          {y.pick && (
+            <div class="yard-pick">
+              <span><small>Top pick</small><strong>{y.pick.shortName}</strong></span>
+              <BuyButton model={y.pick} label="Check price" size="sm" />
+            </div>
+          )}
+          <span class="go">See every pick</span>
+        </div>
+      ))}
+    </div>
+
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Side by side</span>
+        <h2 class="section-title">Highest-rated models at a glance</h2>
+      </div>
+      <a class="section-link" href="/dehumidifiers/">Compare all {MODELS.length} →</a>
+    </div>
+    <ComparisonTable models={topModels} />
+
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Free tools</span>
+        <h2 class="section-title">Don't guess. Calculate.</h2>
+      </div>
+      <a class="section-link" href="/tools/">All tools →</a>
+    </div>
+    <div class="tool-grid">
+      <a class="tool-card" href="/tools/capacity-sizer/">
+        <div class="tool-icon">📐</div>
+        <h3>Capacity Sizer</h3>
+        <p>Enter your square footage, space type and dampness to get the AHAM pints/day you need.</p>
+        <span class="go">Size my space</span>
+      </a>
+      <a class="tool-card" href="/tools/operating-cost/">
+        <div class="tool-icon">💰</div>
+        <h3>Running Cost Calculator</h3>
+        <p>See what each model costs per year in electricity at your kWh rate.</p>
+        <span class="go">Do the math</span>
+      </a>
+      <a class="tool-card" href="/tools/portable-vs-whole-house/">
+        <div class="tool-icon">⚖️</div>
+        <h3>Portable vs Whole-House</h3>
+        <p>The true 5-year cost of a portable versus a pro-grade whole-house unit.</p>
+        <span class="go">Compare costs</span>
+      </a>
+    </div>
+
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Buying advice</span>
+        <h2 class="section-title">Comparisons &amp; guides</h2>
+      </div>
+      <a class="section-link" href="/guides/">All guides →</a>
+    </div>
+    <div class="post-grid">
+      {guides.map((post) => <PostCard post={post} />)}
+    </div>
+
+    <section class="strip" aria-label="Why trust this guide">
+      <div>
+        <h2>Research you can actually check.</h2>
+        <p>We earn a commission when you buy through our links, but it never changes which dehumidifier we recommend.</p>
+        <a class="btn" href="/how-we-research/">How we score units</a>
+      </div>
+      <div class="strip-items">
+        <div><div class="n">01</div><h3>AHAM only</h3><p>Every capacity compared at 80°F/60% RH. Saturation marketing numbers get translated, not trusted.</p></div>
+        <div><div class="n">02</div><h3>Specs, cross-checked</h3><p>Capacity, coverage and drainage claims verified across manufacturers, spec sheets and owner reports.</p></div>
+        <div><div class="n">03</div><h3>Tools, not just words</h3><p>Calculators built from real specs turn "what size?" into a number, not a guess.</p></div>
+      </div>
+    </section>
+
+    <section class="faq home-faq" aria-label="Frequently asked questions">
+      <h2 class="section-title">Dehumidifier FAQ</h2>
+      {faq.map((f) => <details><summary>{f.q}</summary><div>{f.a}</div></details>)}
+    </section>
+  </div>
+
+  <StickyCta model={top} label={`#1 ${picks[0].label}`} showAfter={1400} />
+</BaseLayout>

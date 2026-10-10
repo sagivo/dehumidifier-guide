@@ -1,0 +1,35 @@
+---
+import { getModel } from "../data/models";
+import ProductImage from "./ProductImage.astro";
+import BuyButton from "./BuyButton.astro";
+import PriceTier from "./PriceTier.astro";
+
+interface Props {
+  picks: { id: string; label: string }[];
+  title?: string;
+}
+const { picks, title = "Our top picks" } = Astro.props;
+const rows = picks.map((p) => ({ ...p, m: getModel(p.id) }));
+---
+
+<section class="top-picks" aria-label={title}>
+  <h2 class="tp-title">{title}</h2>
+  <ol class="pick-rows">
+    {rows.map(({ m, label }, i) => (
+      <li class:list={["pick-row", i === 0 && "winner"]}>
+        <span class="pr-rank" aria-hidden="true">{i + 1}</span>
+        <span class="pr-img"><ProductImage model={m} size={84} /></span>
+        <div class="pr-main">
+          <span class="pr-label">{label}</span>
+          <a class="pr-name" href={`/dehumidifiers/${m.id}/`}>{m.name}</a>
+          <span class="pr-specs">{m.pintsAham} pints/day (AHAM) · Up to {m.maxSqFt.toLocaleString("en-US")} sq ft · {m.brand}</span>
+        </div>
+        <span class="score sm" title="Guide score out of 10">{m.score.toFixed(1)}</span>
+        <div class="pr-buy">
+          <span class="pr-price"><PriceTier model={m} /></span>
+          <BuyButton model={m} label={i === 0 ? "Check price on Amazon" : "Check price"} size="sm" />
+        </div>
+      </li>
+    ))}
+  </ol>
+</section>

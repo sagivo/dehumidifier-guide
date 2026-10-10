@@ -1,0 +1,81 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import { SITE_NAME, SITE_URL } from "../lib/site";
+import { breadcrumbLd, type Crumb } from "../lib/schema";
+
+const crumbs: Crumb[] = [
+  { name: "Home", href: "/" },
+  { name: "How we research", href: "/how-we-research/" },
+];
+---
+
+<BaseLayout
+  title="How We Research & Score Dehumidifiers"
+  description={`How ${SITE_NAME} researches whole-house dehumidifiers: where our specs come from, how the 10-point score works, how we handle AHAM vs saturation ratings, and how often guides are updated.`}
+  canonical={`${SITE_URL}/how-we-research/`}
+  jsonLd={breadcrumbLd(crumbs)}
+>
+  <div class="wrap post-wrap">
+    <Breadcrumbs crumbs={crumbs} />
+    <article class="prose">
+      <h1>How we research and score dehumidifiers</h1>
+      <p class="lead-p">
+        We'd rather tell you exactly how our recommendations are made than imply something they
+        aren't. Here's the process behind every guide, review and calculator on {SITE_NAME}.
+      </p>
+
+      <h2>What we do (and don't do)</h2>
+      <p>
+        {SITE_NAME} is a <strong>research-based</strong> buyer's guide. We don't run a lab, and our
+        reviews are not hands-on tests. Instead, for every model we:
+      </p>
+      <ul>
+        <li><strong>Start from the manufacturer's spec sheet</strong>: AHAM capacity, coverage, drainage, dimensions, power draw, filter type, warranty.</li>
+        <li><strong>Translate the marketing.</strong> Some brands advertise "saturation" capacity measured near 90°F/90% RH — roughly double the comparable AHAM figure. We always lead with the AHAM number and label the box number for what it is.</li>
+        <li><strong>Cross-check with independent reviews</strong> from publications that do test hands-on, and note where their results differ from the marketing claims.</li>
+        <li><strong>Read owner reports</strong> (forums, retailer reviews, support threads) for the problems that only show up after months of use: drain clogs, pump failures, noise complaints, support response times.</li>
+        <li><strong>Flag uncertainty.</strong> When a spec can't be confirmed, or sources disagree, we say so rather than guess.</li>
+      </ul>
+      <p>Each model page lists the sources we relied on.</p>
+
+      <h2>How the 10-point score works</h2>
+      <p>Every model gets four sub-scores, each out of 10:</p>
+      <ul>
+        <li><strong>Capacity</strong>: honest AHAM pints/day relative to the unit's size class and rated coverage.</li>
+        <li><strong>Efficiency</strong>: energy factor (L/kWh), amp draw and Energy Star status — what it costs to run.</li>
+        <li><strong>Build quality</strong>: cabinet construction, coil protection, filter quality, warranty length and brand support reputation.</li>
+        <li><strong>Value</strong>: typical street price against what you get, including warranty and running costs.</li>
+      </ul>
+      <p>
+        The overall score is a weighted blend of the four, rounded to one decimal, plus small adjustments for
+        reliability and support reputation. A 9+ is exceptional, 8–9 is a strong buy for the right space,
+        and under 7.5 means real compromises.
+      </p>
+      <p>
+        A higher score doesn't mean it's the right unit for <em>you</em>. A 9.0 whole-house flagship is a bad buy for a
+        1,000 sq ft crawl space. That's why we built the <a href="/tools/capacity-sizer/">capacity sizer</a>.
+      </p>
+
+      <h2>Prices</h2>
+      <p>
+        Prices are typical US street prices at the time of our last update and are shown as ranges because
+        dehumidifiers are discounted often. Always check the current price on the retailer page.
+      </p>
+
+      <h2>Affiliate links and independence</h2>
+      <p>
+        {SITE_NAME} is reader-supported. As an Amazon Associate we earn from qualifying purchases made through
+        our links, at no extra cost to you. Commissions never decide which products we recommend or how they
+        are ranked. Brands cannot pay for placement, and we don't accept free products in exchange for coverage.
+      </p>
+
+      <h2>Updates and corrections</h2>
+      <p>
+        We review our main buying guides at least quarterly and whenever a significant
+        model launches. Each page shows its last-updated date. Spot an error? <a href="/contact/">Tell us</a>
+        and we'll fix it.
+      </p>
+    </article>
+  </div>
+</BaseLayout>

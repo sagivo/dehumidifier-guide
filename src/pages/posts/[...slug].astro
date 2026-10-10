@@ -1,0 +1,141 @@
+---
+import { render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import TopPicks from "../../components/TopPicks.astro";
+import PostCard from "../../components/PostCard.astro";
+import StickyCta from "../../components/StickyCta.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import { SITE_NAME, SITE_URL } from "../../lib/site";
+import { getModel } from "../../data/models";
+import { getPosts, relatedPosts, CATEGORY_LABEL } from "../../lib/posts";
+import { articleLd, breadcrumbLd, faqLd, itemListLd, type Crumb } from "../../lib/schema";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post, all: posts } }));
+}
+
+const { post, all } = Astro.props;
+const { Content, headings } = await render(post);
+const d = post.data;
+const url = `${SITE_URL}/posts/${post.id}/`;
+const ogImage = `${SITE_URL}/og/posts/${post.id}.png`;
+const updated = d.updatedDate ?? d.pubDate;
+const fmtDate = (x: Date) => x.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+const toc = headings.filter((h) => h.depth === 2);
+const picks = d.picks ?? [];
+const pickModels = picks.map((p) => getModel(p.id));
+const related = relatedPosts(post, all);
+
+const crumbs: Crumb[] = [
+  { name: "Home", href: "/" },
+  { name: "Guides", href: "/guides/" },
+  { name: d.title, href: `/posts/${post.id}/` },
+];
+
+const jsonLd: Record<string, unknown>[] = [
+  articleLd({ title: d.title, description: d.description, url, pubDate: d.pubDate, updatedDate: d.updatedDate, image: ogImage }),
+  breadcrumbLd(crumbs),
+];
+if (pickModels.length) jsonLd.push(itemListLd(d.title, pickModels));
+if (d.faq?.length) jsonLd.push(faqLd(d.faq));
+---
+
+<BaseLayout
+  title={d.seoTitle ?? d.title}
+  description={d.description}
+  canonical={url}
+  ogImage={ogImage}
+  jsonLd={jsonLd}
+  article={{ pubDate: d.pubDate.toISOString(), updatedDate: updated.toISOString() }}
+>
+  <div class="wrap wide post-wrap">
+    <Breadcrumbs crumbs={crumbs} />
+    <div class="post-layout">
+    <article class="prose" id="article" data-pagefind-body>
+      <header class="post-head">
+        <span class="post-tag">{d.tag ?? CATEGORY_LABEL[d.category]}</span>
+        <h1>{d.title}</h1>
+        <p class="post-meta">
+          <span class="fresh"><time datetime={updated.toISOString()}>Updated {fmtDate(updated)}</time></span>
+          <span>By <a href="/about/">{SITE_NAME} Editorial Team</a></span>
+          <a href="/how-we-research/">How we research</a>
+        </p>
+      </header>
+      <div class="affiliate-note">
+        We may earn a commission when you buy through links on this page, at no extra cost to you.
+        Prices are approximate and change often, so check the current price before you buy.
+      </div>
+
+      {d.takeaways?.length ? (
+        <aside class="takeaways" aria-label="Key takeaways">
+          <h2>Key takeaways</h2>
+          <ul>{d.takeaways.map((t) => <li set:html={t} />)}</ul>
+        </aside>
+      ) : null}
+
+      {picks.length ? <div data-pagefind-ignore><TopPicks picks={picks} /></div> : null}
+
+      {toc.length >= 3 && (
+        <nav class="toc" aria-label="Table of contents">
+          <details>
+            <summary>On this page <span>{toc.length + (d.faq?.length ? 1 : 0)} sections</span></summary>
+            <ol>
+              {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+              {d.faq?.length ? <li><a href="#faq">FAQ</a></li> : null}
+            </ol>
+          </details>
+        </nav>
+      )}
+
+      <Content />
+
+      <aside class="related-tools" aria-label="Related tools" data-pagefind-ignore>
+        <h2>Don't guess. Calculate.</h2>
+        <ul>
+          <li><a href="/tools/capacity-sizer/">📐 Capacity Sizer</a>: which models fit your space</li>
+          <li><a href="/tools/operating-cost/">💰 Running Cost Calculator</a>: yearly electricity cost</li>
+          <li><a href="/tools/portable-vs-whole-house/">⚖️ Portable vs Whole-House</a>: the true 5-year cost</li>
+          <li><a href="/dehumidifiers/">📊 Compare every model</a>: sortable spec table</li>
+        </ul>
+      </aside>
+
+      {d.faq?.length ? (
+        <section class="faq" id="faq" aria-label="Frequently asked questions">
+          <h2>Frequently asked questions</h2>
+          {d.faq.map((f) => (
+            <details>
+              <summary>{f.q}</summary>
+              <div>{f.a}</div>
+            </details>
+          ))}
+        </section>
+      ) : null}
+    </article>
+    <aside class="post-aside" aria-label="Our top pick">
+      <div class="aside-sticky">
+        {pickModels[0] && <p class="aside-kicker">Our #1 pick</p>}
+        {pickModels[0] && <ProductCard model={pickModels[0]} label={picks[0].label} compact featured />}
+        <a class="aside-tool" href="/tools/capacity-sizer/">
+          <strong>📐 Not sure which fits?</strong>
+          <span>Size a dehumidifier to your space and dampness in 30 seconds.</span>
+        </a>
+        <a class="aside-tool" href="/dehumidifiers/">
+          <strong>📊 Compare every model</strong>
+          <span>Sortable chart of all pro-grade dehumidifiers.</span>
+        </a>
+      </div>
+    </aside>
+    </div>
+
+    {related.length > 0 && (
+      <section class="related" aria-label="Related guides">
+        <h2 class="section-title">Keep reading</h2>
+        <div class="post-grid">{related.map((p) => <PostCard post={p} />)}</div>
+      </section>
+    )}
+  </div>
+
+  {pickModels[0] && <StickyCta model={pickModels[0]} label={picks[0].label} />}
+</BaseLayout>

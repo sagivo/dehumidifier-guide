@@ -1,0 +1,54 @@
+---
+import type { DehumidifierModel } from "../data/models";
+import { formatCapacity } from "../data/models";
+import BuyButton from "./BuyButton.astro";
+import ProductImage from "./ProductImage.astro";
+import PriceTier from "./PriceTier.astro";
+
+interface Props {
+  model: DehumidifierModel;
+  label?: string;
+  rank?: number;
+  /** compact = no pros/cons, used in top-picks grids */
+  compact?: boolean;
+  /** heavy outline + offset shadow, for the #1 pick in a row */
+  featured?: boolean;
+  /** award colour for the label pill and image glow */
+  accent?: string;
+}
+const { model: m, label, rank, compact = false, featured = false, accent } = Astro.props;
+---
+
+<article class:list={["product-card", compact && "compact", featured && "featured"]} style={accent ? `--award:${accent}` : undefined}>
+  {label && <span class="pc-label">{rank ? `#${rank} · ` : ""}{label}</span>}
+  <div class="pc-media">
+    <ProductImage model={m} size={compact ? 150 : 190} />
+  </div>
+  <div class="pc-body">
+    <div class="pc-head">
+      <h3 class="pc-name"><a href={`/dehumidifiers/${m.id}/`}>{m.name}</a></h3>
+      <span class="score" title="Guide score out of 10">{m.score.toFixed(1)}</span>
+    </div>
+    <ul class="chips" aria-label="Key specs">
+      <li>{m.pintsAham} pints/day (AHAM)</li>
+      <li>Up to {m.maxSqFt.toLocaleString("en-US")} sq ft</li>
+      <li>{m.drainage.split(" (")[0]}</li>
+      {m.energyStar && <li class="hi">Energy Star</li>}
+    </ul>
+    <p class="pc-best">{m.bestFor}</p>
+    {!compact && (
+      <div class="pc-proscons">
+        <ul class="pros" aria-label="Pros">{m.pros.slice(0, 3).map((p) => <li>{p}</li>)}</ul>
+        <ul class="cons" aria-label="Cons">{m.cons.slice(0, 1).map((c) => <li>{c}</li>)}</ul>
+      </div>
+    )}
+    <div class="pc-price-row">
+      <span class="pc-price"><PriceTier model={m} /></span>
+      <small>today's price on Amazon</small>
+    </div>
+    <div class="pc-actions">
+      <BuyButton model={m} size="sm" block />
+      <a class="pc-review" href={`/dehumidifiers/${m.id}/`}>Read the full review</a>
+    </div>
+  </div>
+</article>

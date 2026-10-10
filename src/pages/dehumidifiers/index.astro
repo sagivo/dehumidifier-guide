@@ -1,0 +1,84 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import ComparisonTable from "../../components/ComparisonTable.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import Visual from "../../components/Visual.astro";
+import { MODELS } from "../../data/models";
+import { SITE_URL } from "../../lib/site";
+import { breadcrumbLd, itemListLd, faqLd, type Crumb } from "../../lib/schema";
+
+const byScore = [...MODELS].sort((a, b) => b.score - a.score);
+const url = `${SITE_URL}/dehumidifiers/`;
+const crumbs: Crumb[] = [
+  { name: "Home", href: "/" },
+  { name: "Compare dehumidifiers", href: "/dehumidifiers/" },
+];
+const faq = [
+  {
+    q: "Which whole-house dehumidifier has the best specs in 2026?",
+    a: `By our research-based score, the ${byScore[0].name} currently ranks highest (${byScore[0].score}/10). The best unit for you depends on space size, drainage options, and climate, so sort the table by the spec that matters most for your home.`,
+  },
+  {
+    q: "How do I compare dehumidifier capacity ratings?",
+    a: "Always compare the AHAM rating (80°F, 60% RH). Some brands market a much larger 'saturation' number measured near 90°F/90% RH — it can be double the AHAM figure. Our table shows both, and our AHAM vs saturation guide explains the trick.",
+  },
+  {
+    q: "What size dehumidifier do I need?",
+    a: "Start with about 10 pints/day (AHAM) per 500 sq ft in a humid climate, add 20–30% headroom, and size up for damp crawl spaces or leaky basements. Our capacity sizer does the math for your square footage and climate zone.",
+  },
+];
+const jsonLd = [breadcrumbLd(crumbs), itemListLd("Whole-house and crawl-space dehumidifiers compared", byScore), faqLd(faq)];
+
+const brands = [...new Set(MODELS.map((m) => m.brand))].sort();
+---
+
+<BaseLayout
+  title="Dehumidifier Comparison Chart (2026): Every Whole-House & Crawl-Space Model"
+  description={`Compare ${MODELS.length} whole-house and crawl-space dehumidifiers side by side: honest AHAM capacity, marketed ratings, coverage, drainage, Energy Star and price. Sortable chart.`}
+  canonical={url}
+  jsonLd={jsonLd}
+>
+  <div class="wrap wide">
+    <Breadcrumbs crumbs={crumbs} />
+    <div class="calc-hero" data-pagefind-body>
+      <h1>Dehumidifier comparison chart</h1>
+      <p>
+        Every whole-house and crawl-space model we track, side by side — with the honest AHAM
+        capacity next to the marketed box number. Click any column to sort by it.
+        Covers {MODELS.length} models from {brands.join(", ")}.
+      </p>
+    </div>
+
+    <ComparisonTable models={byScore} sortable caption="Whole-house and crawl-space dehumidifiers, sorted by Guide score (click headers to re-sort)" />
+    <p class="fine">Capacity and coverage are manufacturer ratings. Prices are typical US street prices as of October 2026 and change often.</p>
+
+    <div class="section-head"><h2 class="section-title">Capacity honesty and value at a glance</h2></div>
+    <div class="viz-pair">
+      <Visual name="chart:capacity" />
+      <Visual name="chart:value" />
+    </div>
+
+    <div class="section-head"><h2 class="section-title">Highest-rated models</h2></div>
+    <div class="tp-grid">
+      {byScore.slice(0, 6).map((m, i) => <ProductCard model={m} rank={i + 1} label="Top rated" />)}
+    </div>
+
+    <div class="prose" style="margin-top:3rem;">
+      <h2>How to read this chart</h2>
+      <p>
+        <strong>AHAM pints/day</strong> is the honest number: measured at 80°F and 60% relative
+        humidity, the industry standard. <strong>Marketed as</strong> shows the box number and which
+        test produced it — "saturation" figures are measured near 90°F/90% RH and run roughly double
+        the AHAM figure. Our <a href="/posts/aham-vs-saturation-pints-explained/">AHAM vs saturation guide</a> decodes
+        the marketing. <strong>Coverage</strong> is the manufacturer's rated square footage; buy
+        20–30% of headroom over your real space. Our <a href="/tools/capacity-sizer/">capacity sizer</a> does
+        that math for you.
+      </p>
+      <section class="faq" aria-label="FAQ">
+        <h2>FAQ</h2>
+        {faq.map((f) => <details><summary>{f.q}</summary><div>{f.a}</div></details>)}
+      </section>
+    </div>
+  </div>
+</BaseLayout>

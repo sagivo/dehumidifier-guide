@@ -1,0 +1,87 @@
+---
+import type { DehumidifierModel } from "../data/models";
+import { formatCapacity } from "../data/models";
+import PriceTier from "./PriceTier.astro";
+import { AFFILIATE_REL, amazonLink } from "../lib/amazon";
+
+interface Props {
+  models: DehumidifierModel[];
+  sortable?: boolean;
+  caption?: string;
+}
+const { models, sortable = false, caption } = Astro.props;
+---
+
+<div class="cmp-wrap">
+  <table class:list={["cmp", sortable && "sortable"]}>
+    {caption && <caption>{caption}</caption>}
+    <thead>
+      <tr>
+        <th scope="col" data-sort="text">Model</th>
+        <th scope="col" data-sort="num">Score</th>
+        <th scope="col" data-sort="num">AHAM pints/day</th>
+        <th scope="col" data-sort="text">Marketed as</th>
+        <th scope="col" data-sort="num">Coverage</th>
+        <th scope="col" data-sort="text">Drainage</th>
+        <th scope="col" data-sort="text">Energy Star</th>
+        <th scope="col" data-sort="num">Price tier</th>
+        <th scope="col"><span class="sr-only">Buy</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {models.map((m) => (
+        <tr>
+          <th scope="row" data-v={m.name}>
+            <a href={`/dehumidifiers/${m.id}/`}>{m.name}</a>
+            <span class="score sm cmp-mscore" aria-hidden="true">{m.score.toFixed(1)}</span>
+          </th>
+          <td class="c-score" data-label="Score" data-v={m.score}><span class="score sm">{m.score.toFixed(1)}</span></td>
+          <td data-label="AHAM pints/day" data-v={m.pintsAham}>{m.pintsAham}</td>
+          <td data-label="Marketed as" data-v={m.pintsMarketed}>{m.pintsMarketed} ({m.marketedBasis === "AHAM" ? "honest" : m.marketedBasis})</td>
+          <td data-label="Coverage" data-v={m.maxSqFt}>{m.maxSqFt.toLocaleString("en-US")} sq ft</td>
+          <td data-label="Drainage" data-v={m.drainage}>{m.drainage.split(" (")[0]}</td>
+          <td data-label="Energy Star" data-v={m.energyStar ? 1 : 0}>{m.energyStar ? "Yes" : "—"}</td>
+          <td data-label="Price tier" data-v={m.priceLow}><PriceTier model={m} label={false} /></td>
+          <td class="c-buy">
+            <a class="btn btn-xs buy" href={amazonLink(m.query, m.asin)} rel={AFFILIATE_REL} target="_blank">
+              Check price<span class="sr-only"> of the {m.name} on Amazon</span>
+            </a>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+<p class="cmp-note"><small>Capacity is compared at AHAM conditions (80°F, 60% RH). "Marketed as" shows the box number and which test produced it — see our <a href="/posts/aham-vs-saturation-pints-explained/">AHAM vs saturation guide</a>.</small></p>
+
+{sortable && (
+  <script>
+    document.querySelectorAll<HTMLTableElement>("table.sortable").forEach((table) => {
+      const tbody = table.tBodies[0];
+      table.querySelectorAll<HTMLTableCellElement>("th[data-sort]").forEach((th, col) => {
+        th.tabIndex = 0;
+        th.setAttribute("role", "button");
+        th.title = "Sort by this column";
+        let asc = false;
+        const sort = () => {
+          asc = !asc;
+          const num = th.dataset.sort === "num";
+          const rows = [...tbody.rows];
+          rows.sort((a, b) => {
+            const av = a.cells[col].dataset.v ?? "";
+            const bv = b.cells[col].dataset.v ?? "";
+            const r = num ? parseFloat(av) - parseFloat(bv) : av.localeCompare(bv);
+            return asc ? r : -r;
+          });
+          rows.forEach((r) => tbody.appendChild(r));
+          table.querySelectorAll("th[aria-sort]").forEach((h) => h.removeAttribute("aria-sort"));
+          th.setAttribute("aria-sort", asc ? "ascending" : "descending");
+        };
+        th.addEventListener("click", sort);
+        th.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sort(); }
+        });
+      });
+    });
+  </script>
+)}

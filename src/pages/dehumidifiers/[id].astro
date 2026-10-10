@@ -1,0 +1,237 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import BuyButton from "../../components/BuyButton.astro";
+import ProductImage from "../../components/ProductImage.astro";
+import { AFFILIATE_REL, amazonLink, tagAmazonUrl } from "../../lib/amazon";
+import ProductCard from "../../components/ProductCard.astro";
+import PostCard from "../../components/PostCard.astro";
+import StickyCta from "../../components/StickyCta.astro";
+import { MODELS, priceTier, formatCapacity, type DehumidifierModel } from "../../data/models";
+import PriceTier from "../../components/PriceTier.astro";
+import { SITE_NAME, SITE_URL } from "../../lib/site";
+import { getPosts } from "../../lib/posts";
+import { breadcrumbLd, faqLd, productLd, type Crumb } from "../../lib/schema";
+
+export async function getStaticPaths() {
+  const reviews = await getCollection("reviews");
+  const posts = await getPosts();
+  return MODELS.map((model) => ({
+    params: { id: model.id },
+    props: { model, review: reviews.find((r) => r.id === model.id), posts },
+  }));
+}
+
+const { model: m, review, posts } = Astro.props as {
+  model: DehumidifierModel;
+  review: Awaited<ReturnType<typeof getCollection<"reviews">>>[number] | undefined;
+  posts: Awaited<ReturnType<typeof getPosts>>;
+};
+const Body = review ? (await render(review)).Content : null;
+const url = `${SITE_URL}/dehumidifiers/${m.id}/`;
+const ogImage = `${SITE_URL}/og/dehumidifiers/${m.id}.png`;
+const updated = review?.data.updatedDate ?? new Date("2026-10-10");
+const fmtDate = (x: Date) => x.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+
+// Alternatives: closest in AHAM capacity among other models, preferring another brand.
+const alternatives = MODELS.filter((x) => x.id !== m.id)
+  .map((x) => ({
+    x,
+    d: Math.abs(x.pintsAham - m.pintsAham) / 10 + (x.brand === m.brand ? 0.6 : 0) + Math.abs(x.priceLow - m.priceLow) / 2000,
+  }))
+  .sort((a, b) => a.d - b.d)
+  .slice(0, 3)
+  .map((a) => a.x);
+
+const mentionedIn = posts.filter((p) => p.data.picks?.some((pk) => pk.id === m.id)).slice(0, 4);
+
+// SEO title and description sized for search results.
+const titleName = m.shortName.toLowerCase().startsWith(m.brand.toLowerCase()) ? m.shortName : `${m.brand} ${m.shortName}`;
+const longTitle = `${titleName} Review (2026): Pros, Cons & Price`;
+const title = longTitle.length <= 58 ? longTitle : `${titleName} Review (2026)`;
+const description = `${titleName} review: ${m.pintsAham} pints/day (AHAM), up to ${m.maxSqFt.toLocaleString("en-US")} sq ft, ${m.drainage.split(" (")[0].toLowerCase()}. Pros, cons, alternatives and our ${m.score}/10 verdict.`;
+
+const crumbs: Crumb[] = [
+  { name: "Home", href: "/" },
+  { name: "Compare dehumidifiers", href: "/dehumidifiers/" },
+  { name: m.name, href: `/dehumidifiers/${m.id}/` },
+];
+const jsonLd: Record<string, unknown>[] = [productLd(m, url, updated, ogImage), breadcrumbLd(crumbs)];
+if (review?.data.faq?.length) jsonLd.push(faqLd(review.data.faq));
+
+const specs: [string, string][] = [
+  ["Brand", m.brand],
+  ["Capacity (AHAM, 80°F/60% RH)", `${m.pintsAham} pints/day`],
+  ...(m.pintsSaturation
+    ? ([["Marketed capacity (saturation)", `${m.pintsSaturation} pints/day — see the AHAM note below`]] as [string, string][])
+    : []),
+  ["Max coverage", `${m.maxSqFt.toLocaleString("en-US")} sq ft`],
+  ["Drainage", m.drainage],
+  ["Dimensions", m.dimensionsIn],
+  ["Weight", `${m.weightLbs} lbs`],
+  ["Power draw", `${m.amps}A`],
+  ...(m.cfm ? ([["Airflow", `${m.cfm} CFM`]] as [string, string][]) : []),
+  ...(m.noiseDb ? ([["Noise", m.noiseDb]] as [string, string][]) : []),
+  ["Filter", m.filter],
+  ["Energy Star", m.energyStar ? "Yes" : "No"],
+  ["Warranty", `${m.warrantyYears} years`],
+  ["Price tier", `${priceTier(m).sym} ${priceTier(m).label} (${priceTier(m).range}). See Amazon for today's price.`],
+];
+const bars: [string, number][] = [
+  ["Capacity", m.scores.capacity],
+  ["Efficiency", m.scores.efficiency],
+  ["Build quality", m.scores.build],
+  ["Value", m.scores.value],
+];
+---
+
+<BaseLayout title={title} description={description} canonical={url} ogImage={ogImage} jsonLd={jsonLd} hidePromo>
+  <div class="wrap post-wrap">
+    <Breadcrumbs crumbs={crumbs} />
+
+    <div data-pagefind-body>
+    <header class="review-hero">
+      <div class="rh-art">
+        <span class="ring lg" style={`--v:${m.score * 10}`} title="Guide score out of 10"><span>{m.score.toFixed(1)}</span></span>
+        <ProductImage model={m} size={300} eager />
+      </div>
+      <div class="rh-body">
+        <span class="post-tag">{m.brand} · {m.tier === "budget" ? "Budget" : m.tier === "mid" ? "Mid-range" : "Premium"}</span>
+        <h1>{m.name} Review</h1>
+        <p class="rh-best">{m.bestFor}</p>
+        <ul class="chips rh-chips" aria-label="Key specs">
+          <li>{m.pintsAham} pints/day (AHAM)</li>
+          <li>Up to {m.maxSqFt.toLocaleString("en-US")} sq ft</li>
+          <li>{m.drainage.split(" (")[0]}</li>
+          {m.energyStar && <li class="hi">Energy Star</li>}
+        </ul>
+        <div class="rh-meta">
+          <span class="rh-price"><PriceTier model={m} /><small>price tier · see Amazon for today's price</small></span>
+        </div>
+        <div class="rh-buy">
+          <BuyButton model={m} size="lg" />
+          <a class="btn ghost" href="#alternatives">See alternatives</a>
+        </div>
+        <p class="buy-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z" fill="currentColor"/></svg>
+          Opens Amazon in a new tab. Our score is never influenced by commissions.
+        </p>
+        <p class="byline">
+          By <a href="/about/">{SITE_NAME} Editorial Team</a> ·
+          <time datetime={updated.toISOString()}>Updated {fmtDate(updated)}</time> ·
+          <a href="/how-we-research/">How we score</a>
+        </p>
+      </div>
+    </header>
+
+    <div class="affiliate-note">
+      We may earn a commission when you buy through links on this page, at no extra cost to you.
+      Our score comes from manufacturer specs, professional reviews, and owner reports. It is not
+      a hands-on lab test.
+    </div>
+
+    <section class="review-grid">
+      <div class="verdict-box">
+        <h2>The verdict</h2>
+        <p>{m.verdict}</p>
+        <div class="pc-proscons big">
+          <div>
+            <h3>What we like</h3>
+            <ul class="pros">{m.pros.map((p) => <li>{p}</li>)}</ul>
+          </div>
+          <div>
+            <h3>Watch out for</h3>
+            <ul class="cons">{m.cons.map((c) => <li>{c}</li>)}</ul>
+          </div>
+        </div>
+      </div>
+      <div class="score-box">
+        <h2>Score breakdown</h2>
+        {bars.map(([k, v]) => (
+          <div class="bar">
+            <span>{k}</span>
+            <div class="bar-track"><div class="bar-fill" style={`width:${v * 10}%`}></div></div>
+            <strong>{v}</strong>
+          </div>
+        ))}
+        <p class="score-note">Capacity: {formatCapacity(m)}</p>
+      </div>
+    </section>
+
+    <article class="prose">
+      <h2 id="specs">{m.shortName} specs</h2>
+      <table class="spec-table">
+        <tbody>
+          {specs.map(([k, v]) => <tr><th scope="row">{k}</th><td>{v}</td></tr>)}
+        </tbody>
+      </table>
+      {m.specNotes?.length ? <ul class="spec-notes">{m.specNotes.map((n) => <li>{n}</li>)}</ul> : null}
+      <p class="fine">Specs are compiled from manufacturer listings and may change between production runs. Confirm on the retailer page before buying.</p>
+
+      {Body && <Body />}
+
+      <div class="inline-cta">
+        <div>
+          <small>Ready to buy? · {m.score.toFixed(1)}/10</small>
+          <strong>{m.name}</strong>
+          <span><PriceTier model={m} /> · {m.pintsAham} pints/day (AHAM) · up to {m.maxSqFt.toLocaleString("en-US")} sq ft</span>
+        </div>
+        <BuyButton model={m} />
+      </div>
+
+      {mentionedIn.length > 0 && (
+        <>
+          <h2 id="featured-in">Featured in our guides</h2>
+          <ul>{mentionedIn.map((p) => <li><a href={`/posts/${p.id}/`}>{p.data.title}</a></li>)}</ul>
+        </>
+      )}
+
+      {review?.data.faq?.length ? (
+        <section class="faq" id="faq" aria-label="Frequently asked questions">
+          <h2>{m.shortName} FAQ</h2>
+          {review.data.faq.map((f) => (
+            <details>
+              <summary>{f.q}</summary>
+              <div>{f.a}</div>
+            </details>
+          ))}
+        </section>
+      ) : null}
+
+      {m.sources.length > 0 && (
+        <>
+          <h2 id="sources">Sources</h2>
+          <ul class="sources">
+            {m.sources.map((s) => {
+              const isAmazon = /^https?:\/\/(www\.)?amazon\.com\//.test(s);
+              return <li><a href={isAmazon ? tagAmazonUrl(s) : s} rel={isAmazon ? AFFILIATE_REL : "noopener nofollow"} target="_blank">{new URL(s).hostname.replace(/^www\./, "")}</a></li>;
+            })}
+          </ul>
+        </>
+      )}
+    </article>
+
+    </div>
+    <section id="alternatives" aria-label="Alternatives">
+      <div class="section-head alt-head">
+        <div>
+          <span class="eyebrow">Not sold yet?</span>
+          <h2 class="section-title">Alternatives to the {m.shortName}</h2>
+        </div>
+      </div>
+      <div class="tp-grid alt-grid swipe">
+        {alternatives.map((a) => <ProductCard model={a} compact />)}
+      </div>
+      <p style="margin-top:1.25rem;"><a class="section-link" href="/dehumidifiers/">Compare all {MODELS.length} models →</a></p>
+    </section>
+
+    {posts.length > 0 && (
+      <section class="related" aria-label="Buying guides">
+        <h2 class="section-title">Helpful guides</h2>
+        <div class="post-grid">{posts.filter((p) => p.data.category === "best").slice(0, 3).map((p) => <PostCard post={p} />)}</div>
+      </section>
+    )}
+  </div>
+  <StickyCta model={m} />
+</BaseLayout>

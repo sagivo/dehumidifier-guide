@@ -1,0 +1,129 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { SITE_URL } from "../../lib/site";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import { breadcrumbLd } from "../../lib/schema";
+import { MODELS, priceTier } from "../../data/models";
+import { amazonLink } from "../../lib/amazon";
+
+const modelsJson = JSON.stringify(
+  MODELS.map((m) => ({ id: m.id, name: m.name, shortName: m.shortName, pintsAham: m.pintsAham, maxSqFt: m.maxSqFt, priceLow: m.priceLow, score: m.score, drainage: m.drainage.split(" (")[0], link: amazonLink(m.query, m.asin) }))
+);
+
+const title = "Dehumidifier Capacity Sizer — How Many Pints Do You Need?";
+const description =
+  "Size your whole-house or crawl-space dehumidifier: enter square footage, space type and dampness to get the AHAM pints/day you need, with matched models.";
+const url = `${SITE_URL}/tools/capacity-sizer/`;
+
+const crumbs = [
+  { name: "Home", href: "/" },
+  { name: "Tools", href: "/tools/" },
+  { name: "Capacity sizer", href: "/tools/capacity-sizer/" },
+];
+const jsonLd = [breadcrumbLd(crumbs), {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Dehumidifier Capacity Sizer",
+  applicationCategory: "UtilitiesApplication",
+  operatingSystem: "Any",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  url,
+}];
+---
+
+<BaseLayout title={title} description={description} canonical={url} jsonLd={jsonLd}>
+  <div class="wrap">
+    <Breadcrumbs crumbs={crumbs} />
+    <div class="calc-hero">
+      <h1>What size dehumidifier do you need?</h1>
+      <p>
+        Dehumidifiers are sized in <strong>pints per day at AHAM conditions</strong> (80°F, 60% RH).
+        Answer four questions and get the honest capacity your space needs — plus the models that deliver it.
+      </p>
+    </div>
+
+    <div class="calc">
+      <div>
+        <label for="sqft">Space size <output id="sqft-out">1,500 sq ft</output></label>
+        <input id="sqft" type="range" min="400" max="8000" step="100" value="1500" />
+      </div>
+      <div class="row">
+        <div>
+          <label for="space">Space type</label>
+          <select id="space">
+            <option value="1.0">Sealed / encapsulated crawl space</option>
+            <option value="1.15" selected>Basement</option>
+            <option value="1.25">Vented crawl space</option>
+            <option value="1.35">Whole house (ducted)</option>
+          </select>
+        </div>
+        <div>
+          <label for="damp">How damp is it?</label>
+          <select id="damp">
+            <option value="0.85">Slightly musty — preventive</option>
+            <option value="1.0" selected>Noticeably damp</option>
+            <option value="1.2">Very damp / musty smell</option>
+            <option value="1.4">Standing moisture / past mold</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label for="climate">Climate</label>
+        <select id="climate">
+          <option value="0.85">Dry / mountain west</option>
+          <option value="1.0" selected>Moderate (Midwest, Northeast)</option>
+          <option value="1.2">Humid (Southeast, Mid-Atlantic)</option>
+          <option value="1.35">Gulf Coast / very humid</option>
+        </select>
+      </div>
+      <div class="calc-result" id="size-result" aria-live="polite"></div>
+    </div>
+
+    <article class="prose" data-pagefind-body>
+      <h2>How the math works</h2>
+      <p>
+        Start with roughly <strong>10 pints/day (AHAM) per 500 sq ft</strong> in a moderately damp
+        space, then multiply by your space type, dampness level and climate — and add 20–30% headroom
+        so the unit cycles instead of running flat-out. The result is the <em>AHAM</em> figure to shop
+        for, not the inflated "saturation" number on some boxes. Our
+        <a href="/posts/aham-vs-saturation-pints-explained/">AHAM vs saturation guide</a> shows how
+        to translate marketing claims, and
+        <a href="/posts/dehumidifier-sizing-by-climate-zone/">sizing by climate zone</a> has the full tables.
+      </p>
+    </article>
+  </div>
+
+  <script define:vars={{ modelsJson }}>
+    const MODELS = JSON.parse(modelsJson);
+    const $ = (id) => document.getElementById(id);
+    const fmt = (n) => Math.round(n).toLocaleString("en-US");
+
+    function paint(el) {
+      const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+      el.style.setProperty("--fill", pct + "%");
+    }
+
+    function calc() {
+      const sqft = Number($("sqft").value);
+      const need = Math.ceil((sqft / 500) * 10 * Number($("space").value) * Number($("damp").value) * Number($("climate").value) * 1.25);
+      $("sqft-out").textContent = fmt(sqft) + " sq ft";
+      paint($("sqft"));
+
+      const fits = MODELS.filter((m) => m.pintsAham >= need && m.maxSqFt >= sqft).sort((a, b) => b.score - a.score);
+      const close = MODELS.filter((m) => !fits.includes(m) && m.pintsAham >= need * 0.8).sort((a, b) => b.score - a.score).slice(0, 2);
+
+      let html = `<p class="calc-big">You need about <strong>${need} pints/day (AHAM)</strong></p>`;
+      html += `<p>Shop by the AHAM number — ignore "saturation" box claims. ${fits.length ? "These models meet it:" : "No single model in our database quite reaches that; consider two units or the closest options below."}</p>`;
+      const list = [...fits.slice(0, 4), ...close].slice(0, 4);
+      if (list.length) {
+        html += `<div class="calc-picks">` + list.map((m) =>
+          `<div class="calc-pick"><div><strong><a href="/dehumidifiers/${m.id}/">${m.name}</a></strong><span>${m.pintsAham} pints/day AHAM · up to ${fmt(m.maxSqFt)} sq ft · ${m.drainage}</span></div><a class="btn btn-xs buy" href="${m.link}" target="_blank" rel="sponsored nofollow noopener">Check price</a></div>`
+        ).join("") + `</div>`;
+      }
+      $("size-result").innerHTML = html;
+    }
+
+    ["sqft", "space", "damp", "climate"].forEach((id) => $(id).addEventListener("input", calc));
+    calc();
+  </script>
+</BaseLayout>

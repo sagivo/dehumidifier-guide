@@ -1,0 +1,139 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { SITE_URL } from "../../lib/site";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import { breadcrumbLd } from "../../lib/schema";
+import { MODELS, formatMoney } from "../../data/models";
+import { amazonLink } from "../../lib/amazon";
+
+const modelsJson = JSON.stringify(
+  MODELS.map((m) => ({ id: m.id, name: m.shortName, priceLow: m.priceLow, watts: Math.round(m.amps * 120), link: amazonLink(m.query, m.asin) }))
+);
+
+const title = "Portable vs. Whole-House Dehumidifier Cost Comparison";
+const description =
+  "Compare the true 5-year cost of a portable 50-pint dehumidifier vs. a whole-house unit: upfront price plus electricity, filters and lifespan.";
+const url = `${SITE_URL}/tools/portable-vs-whole-house/`;
+
+const crumbs = [
+  { name: "Home", href: "/" },
+  { name: "Tools", href: "/tools/" },
+  { name: "Portable vs whole-house", href: "/tools/portable-vs-whole-house/" },
+];
+const jsonLd = [breadcrumbLd(crumbs), {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Portable vs Whole-House Dehumidifier Cost Comparison",
+  applicationCategory: "UtilitiesApplication",
+  operatingSystem: "Any",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  url,
+}];
+---
+
+<BaseLayout title={title} description={description} canonical={url} jsonLd={jsonLd}>
+  <div class="wrap">
+    <Breadcrumbs crumbs={crumbs} />
+    <div class="calc-hero">
+      <h1>Portable vs. whole-house: the real 5-year math</h1>
+      <p>
+        A $250 portable 50-pint unit looks cheap next to a $1,500 whole-house system — until you
+        count electricity, replacements, and the rooms it can't protect. Run your numbers.
+      </p>
+    </div>
+
+    <div class="calc">
+      <div class="row">
+        <div>
+          <label for="port-price">Portable unit price <output id="port-price-out">$250</output></label>
+          <input id="port-price" type="range" min="150" max="500" step="10" value="250" />
+        </div>
+        <div>
+          <label for="wh">Whole-house unit</label>
+          <select id="wh"></select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="hours">Running hours per day <output id="hours-out">12 hours</output></label>
+          <input id="hours" type="range" min="4" max="24" step="1" value="12" />
+        </div>
+        <div>
+          <label for="rate">Electricity rate <output id="rate-out">$0.17/kWh</output></label>
+          <input id="rate" type="range" min="0.08" max="0.40" step="0.01" value="0.17" />
+        </div>
+      </div>
+      <div>
+        <label for="years">Comparison period <output id="years-out">5 years</output></label>
+        <input id="years" type="range" min="2" max="10" step="1" value="5" />
+      </div>
+      <div class="calc-result" id="vs-result" aria-live="polite"></div>
+    </div>
+
+    <article class="prose" data-pagefind-body>
+      <h2>When portable is enough — and when it's false economy</h2>
+      <p>
+        A portable 50-pint unit is fine for <strong>one damp room</strong> you occupy: a bedroom, a
+        home office, a small finished basement you use daily. It becomes false economy when the
+        moisture problem is structural — a crawl space, an unfinished basement, or whole-house
+        humidity. Portables can't be ducted, most need their bucket emptied (or a jury-rigged hose),
+        and their 1–2 year typical lifespan means you may buy two or three of them in the time one
+        pro-grade unit runs. The full breakdown is in
+        <a href="/posts/portable-vs-whole-house-dehumidifier/">portable vs. whole-house dehumidifier</a>.
+      </p>
+    </article>
+  </div>
+
+  <script define:vars={{ modelsJson }}>
+    const MODELS = JSON.parse(modelsJson);
+    const $ = (id) => document.getElementById(id);
+    const money = (n) => "$" + Math.round(n).toLocaleString("en-US");
+    // Typical 50-pint portable: ~550W, ~2-year service life in hard use.
+    const PORT_WATTS = 550, PORT_LIFE = 2;
+
+    const sel = $("wh");
+    MODELS.forEach((m, i) => {
+      const o = document.createElement("option");
+      o.value = i;
+      o.textContent = `${m.name} (${money(m.priceLow)})`;
+      if (m.id === "alorair-sentinel-hd55") o.selected = true;
+      sel.appendChild(o);
+    });
+
+    function paint(el) {
+      const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+      el.style.setProperty("--fill", pct + "%");
+    }
+
+    function calc() {
+      const m = MODELS[Number(sel.value)];
+      const portPrice = Number($("port-price").value);
+      const hours = Number($("hours").value);
+      const rate = Number($("rate").value);
+      const years = Number($("years").value);
+      ["port-price", "hours", "rate", "years"].forEach((id) => paint($(id)));
+      $("port-price-out").textContent = money(portPrice);
+      $("hours-out").textContent = hours + " hours";
+      $("rate-out").textContent = "$" + rate.toFixed(2) + "/kWh";
+      $("years-out").textContent = years + " years";
+
+      const kwhRate = rate;
+      const portUnits = Math.ceil(years / PORT_LIFE);
+      const portTotal = portUnits * portPrice + (PORT_WATTS * hours / 1000) * 365 * years * kwhRate;
+      const whTotal = m.priceLow + (m.watts * hours / 1000) * 365 * years * kwhRate;
+      const winner = whTotal < portTotal ? "whole-house" : "portable";
+      const diff = Math.abs(whTotal - portTotal);
+
+      $("vs-result").innerHTML =
+        `<p class="calc-big">Over ${years} years, the <strong>${winner}</strong> route costs <strong>${money(diff)} less</strong></p>` +
+        `<div class="calc-picks">
+          <div class="calc-pick"><div><strong>Portable 50-pint × ${portUnits}</strong><span>${money(portTotal)} total (${money(portUnits * portPrice)} hardware + ${money(portTotal - portUnits * portPrice)} electricity)</span></div></div>
+          <div class="calc-pick"><div><strong><a href="/dehumidifiers/${m.id}/">${m.name}</a></strong><span>${money(whTotal)} total (${money(m.priceLow)} hardware + ${money(whTotal - m.priceLow)} electricity)</span></div><a class="btn btn-xs buy" href="${m.link}" target="_blank" rel="sponsored nofollow noopener">Check price</a></div>
+        </div>` +
+        `<p>Assumes the portable lasts ~${PORT_LIFE} years of hard use and both run the same hours. Whole-house units also protect spaces a portable can't reach — crawl spaces, wall cavities, ductwork.</p>`;
+    }
+
+    [sel, $("port-price"), $("hours"), $("rate"), $("years")].forEach((el) => el.addEventListener("input", calc));
+    calc();
+  </script>
+</BaseLayout>
